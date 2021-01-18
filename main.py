@@ -3,6 +3,8 @@ import datetime as DT
 import matplotlib.pyplot as plt
 import ytbscrapper
 
+channel_id = 'UCgtAOyEQdAyjvm9ATCi_Aig'
+
 video_path, info_path = ytbscrapper.get_info(channel_id)
 
 with open(info_path, 'r') as file:

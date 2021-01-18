@@ -79,11 +79,12 @@ def get_info(channel_id, path=''):
     secure = SecureTransport()
     secure.disable()
     now = DT.datetime.now()
+    now_str = DT.datetime.strftime(now, "%Y-%m-%dT%H-%M-%SZ")
     if not path:
         path = 'C:\\Users\\d.abramov\\PycharmProjects' \
            '\\WebScrappingYoutube\\'
-    video_path = 'video_ids_{}_{}.json'.format(now, channel_id)
-    info_path = 'video_info_{}_{}.json'.format(now, channel_id)
+    video_path = 'video_ids_{}_{}.json'.format(now_str, channel_id)
+    info_path = 'video_info_{}_{}.json'.format(now_str, channel_id)
     API_KEY = "AIzaSyASBeMw6E_uKXocqyBBydhzgrzM6Cq9dbQ"
     api_service_name = 'youtube'
     api_version = 'v3'
