@@ -7,15 +7,14 @@ https://developers.google.com/youtube/v3/docs
 '''
 import os
 import json
+import datetime as DT
 import googleapiclient.discovery
-import googleapiclient.errors
 from securetransport import SecureTransport
 
 def get_video_info(youtube, video_ids):
-    part_videos = ['snippet', 'statistics']
-    #data id : [params]
     data = {}
     count = 0
+    part_videos = ['snippet', 'statistics']
     while True:
         slice = video_ids[count*50:count*50+50]
         if not slice:
@@ -47,20 +46,18 @@ def get_video_info(youtube, video_ids):
             data[id] = dct
     return data
 
-def get_channel_info(youtube, username):
+def get_channel_info(youtube, channel_id):
     request = youtube.channels().list(
-        part='id,contentDetails',
-        forUsername=username
+        part='contentDetails',
+        id=channel_id
     )
     response = request.execute()
-    channel_id = response['items'][0]['id']
     uploads = response['items'][0]['contentDetails']['relatedPlaylists']['uploads']
-    return channel_id, uploads
+    return uploads
 
 def get_video_ids(youtube, uploads):
     next_page_token = ''
     video_id_list = []
-
     while True:
         request = youtube.playlistItems().list(
             part='snippet',
@@ -78,23 +75,27 @@ def get_video_ids(youtube, uploads):
 
     return video_id_list
 
-def get_info(video_path, info_path):
+def get_info(channel_id, path=''):
     secure = SecureTransport()
     secure.disable()
-
+    now = DT.datetime.now()
+    if not path:
+        path = 'C:\\Users\\d.abramov\\PycharmProjects' \
+           '\\WebScrappingYoutube\\'
+    video_path = 'video_ids_{}_{}.json'.format(now, channel_id)
+    info_path = 'video_info_{}_{}.json'.format(now, channel_id)
     API_KEY = "AIzaSyASBeMw6E_uKXocqyBBydhzgrzM6Cq9dbQ"
     api_service_name = 'youtube'
     api_version = 'v3'
-    channel_name = 'MooreDubstep'
-    file_name_video_ids = video_path
-    file_name_info = info_path
+    file_name_video_ids = path + video_path
+    file_name_info = path + info_path
     # Create an API client
     youtube = googleapiclient.discovery.build(
         api_service_name, api_version, developerKey=API_KEY)
 
     # Create video ids file
     if not os.path.isfile(file_name_video_ids):
-        channel_id, uploads = get_channel_info(youtube, channel_name)
+        uploads = get_channel_info(youtube, channel_id=channel_id)
         video_id_list = get_video_ids(youtube, uploads)
         with open(file_name_video_ids, 'w', encoding='utf-8') as file:
             json.dump(video_id_list, file, indent=2, ensure_ascii=False)
@@ -108,7 +109,5 @@ def get_info(video_path, info_path):
         with open(file_name_info, 'w') as file:
             json.dump(dct, file, indent=2, ensure_ascii=False)
 
-    with open(file_name_info, 'r') as file:
-        dct = json.load(file)
-
     secure.enable()
+    return file_name_video_ids, file_name_info

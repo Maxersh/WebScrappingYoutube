@@ -1,23 +1,25 @@
-import os
 import json
 import datetime as DT
 import matplotlib.pyplot as plt
-
 import ytbscrapper
 
-
-video_path = r'C:\Users\d.abramov\PycharmProjects' \
-             r'\WebScrappingYoutube\video_ids.json'
-info_path = r'C:\Users\d.abramov\PycharmProjects' \
-            r'\WebScrappingYoutube\video_info.json'
-
-if not os.path.isfile(video_path) or not os.path.isfile(info_path):
-    ytbscrapper.get_info(video_path, info_path)
+video_path, info_path = ytbscrapper.get_info(channel_id)
 
 with open(info_path, 'r') as file:
     info = json.load(file)
 
-dates = []
-for key in info:
-    dates.append(DT.datetime.strptime(info[key]['date'], "%Y-%m-%dT%H:%M:%SZ"))
-print(dates)
+deltas = []
+views = []
+now = DT.datetime.now()
+
+for index, key in enumerate(info):
+    date = DT.datetime.strptime(info[key]['date'], "%Y-%m-%dT%H:%M:%SZ")
+    delta = now - date
+    additive = delta.seconds / 3600 / 24
+    days = delta.days + int(additive + (0.5 if additive > 0 else -0.5))
+    view = info[key]['view']
+    deltas.append(days)
+    views.append(view)
+
+plt.plot(deltas, views, color='red')
+plt.show()
